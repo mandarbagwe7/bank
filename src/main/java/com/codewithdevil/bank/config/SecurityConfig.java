@@ -1,5 +1,7 @@
 package com.codewithdevil.bank.config;
 
+import com.codewithdevil.bank.entities.Role;
+import com.codewithdevil.bank.entities.RoleName;
 import com.codewithdevil.bank.filters.JwtAuthenticationFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -55,6 +57,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(c ->
                         c.requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+//                                .requestMatchers(HttpMethod.PATCH, "/customers/{id}/status").hasRole(RoleName.STAFF.name())
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

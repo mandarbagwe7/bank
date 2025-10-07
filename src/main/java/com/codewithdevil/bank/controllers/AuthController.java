@@ -5,6 +5,7 @@ import com.codewithdevil.bank.dtos.LoginRequest;
 import com.codewithdevil.bank.dtos.LoginResponse;
 import com.codewithdevil.bank.dtos.RegisterRequest;
 import com.codewithdevil.bank.dtos.RefreshResponse;
+import com.codewithdevil.bank.entities.Role;
 import com.codewithdevil.bank.entities.User;
 import com.codewithdevil.bank.mapper.UserMapper;
 import com.codewithdevil.bank.repositories.RoleRepository;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
@@ -52,9 +54,12 @@ public class AuthController {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .roles(Set.of())
                 .build();
 
         userRepository.save(user);
+
+
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toRegisterResponse(user));
     }

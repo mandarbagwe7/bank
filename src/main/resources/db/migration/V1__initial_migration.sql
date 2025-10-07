@@ -40,7 +40,7 @@ create table user_roles
 
 create table customers
 (
-    id            bigint                           not null
+    id            bigint                           auto_increment
         primary key,
     user_id       bigint                           not null,
     kyc_status    varchar(16)  default ('PENDING') not null,
