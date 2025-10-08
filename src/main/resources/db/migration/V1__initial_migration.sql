@@ -64,7 +64,7 @@ create table customers
 
 create table accounts
 (
-    id             bigint                             not null
+    id             bigint                             auto_increment
         primary key,
     customer_id    bigint                             not null,
     account_number varchar(20)                        not null,

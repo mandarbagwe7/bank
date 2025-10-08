@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/customers")
 public class CustomerController {
 
-    private final JwtService jwtService;
+    private final JwtController jwtController;
     private final UserRepository userRepository;
     private final CustomerMapper customerMapper;
     private final CustomerRepository customerRepository;
@@ -32,7 +32,7 @@ public class CustomerController {
             @RequestBody CustomerRequest request,
             @RequestHeader(name = "Authorization") String token
     ){
-        var jwt = getJwt(token);
+        var jwt = jwtController.getJwt(token);
 
         if(jwt.isExpired()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -74,7 +74,7 @@ public class CustomerController {
     public ResponseEntity<?> getSelf(
             @RequestHeader(name = "Authorization") String token
     ){
-        var jwt = getJwt(token);
+        var jwt = jwtController.getJwt(token);
 
         if(jwt.isExpired()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -106,7 +106,7 @@ public class CustomerController {
             @RequestBody KycStatusRequest request,
             @RequestHeader(name = "Authorization") String token
     ){
-        var jwt = getJwt(token);
+        var jwt = jwtController.getJwt(token);
         if(jwt.isExpired()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     Map.of("Error", "Token is expired")
@@ -120,6 +120,7 @@ public class CustomerController {
 
         if(customer.getKycStatus() != request.getStatus()) {
             customer.setKycStatus(request.getStatus());
+            customer.setUpdatedAt(LocalDateTime.now());
             customerRepository.save(customer);
         }
 
@@ -129,10 +130,5 @@ public class CustomerController {
                         customer.getKycStatus()
                 )
         );
-    }
-
-    private Jwt getJwt(String token) {
-        token = token.replace("Bearer ", "");
-        return jwtService.parse(token);
     }
 }
