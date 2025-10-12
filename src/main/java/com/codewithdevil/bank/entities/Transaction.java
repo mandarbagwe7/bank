@@ -1,10 +1,7 @@
 package com.codewithdevil.bank.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,11 +12,12 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int id;
+    private Long id;
 
     @Column(name = "direction")
     @Enumerated(EnumType.STRING)
@@ -29,7 +27,7 @@ public class Transaction {
     private BigDecimal amount;
 
     @Column(name = "currency")
-    private String currency;
+    private CurrencyCode currency;
 
     @Column(name = "narrative")
     private String narrative;

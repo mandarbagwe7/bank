@@ -13,6 +13,7 @@ create table users
 (
     id            bigint auto_increment
         primary key,
+    full_name     varchar(255)                   not null,
     email         varchar(255)                   not null,
     password      varchar(255)                   not null,
     is_active     tinyint(1) default (1)         not null,
@@ -86,7 +87,7 @@ create table accounts
 
 create table transfers
 (
-    id                   bigint                            not null
+    id                   bigint                            auto_increment
         primary key,
     source_account_id    bigint                            not null,
     target_account_id    bigint                            not null,
@@ -111,7 +112,7 @@ create table transfers
 
 create table transactions
 (
-    id             bigint                           not null
+    id             bigint                           auto_increment
         primary key,
     account_id     bigint                           not null,
     direction      varchar(8)                       not null,
@@ -127,7 +128,7 @@ create table transactions
 
 create table audit_logs
 (
-    id            bigint                           not null
+    id            bigint                           auto_increment
         primary key,
     actor_user_id bigint       default (null)      null,
     action        varchar(64)                      not null,

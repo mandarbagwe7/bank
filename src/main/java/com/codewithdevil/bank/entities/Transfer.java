@@ -1,10 +1,7 @@
 package com.codewithdevil.bank.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Transfer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +31,8 @@ public class Transfer {
     private BigDecimal amount;
 
     @Column(name = "currency")
-    private String currency;
+    @Enumerated(EnumType.STRING)
+    private CurrencyCode currency;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

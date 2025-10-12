@@ -13,8 +13,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerRequest {
-    @Column(name = "fullName")
-    private String fullName;
 
     @Column(name = "dob")
     private LocalDate dob;

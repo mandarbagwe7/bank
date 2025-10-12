@@ -52,6 +52,7 @@ public class AuthController {
         user = User.builder()
                 .email(request.getEmail().toLowerCase())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .roles(Set.of())

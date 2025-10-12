@@ -53,6 +53,7 @@ public class CustomerController {
         }
 
         var customerNew = customerMapper.toCustomer(request);
+        customerNew.setFullName(user.getFullName());
         customerNew.setUser(user);
         customerNew.setCreatedAt(LocalDateTime.now());
         customerNew.setUpdatedAt(LocalDateTime.now());
