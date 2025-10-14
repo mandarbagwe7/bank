@@ -1,22 +1,17 @@
 package com.codewithdevil.bank.controllers;
 
 import com.codewithdevil.bank.dtos.AccountRequest;
-import com.codewithdevil.bank.dtos.AccountResponse;
 import com.codewithdevil.bank.dtos.AccountStatusRequest;
-import com.codewithdevil.bank.dtos.AccountStatusResponse;
-import com.codewithdevil.bank.entities.Account;
-import com.codewithdevil.bank.entities.AccountStatus;
-import com.codewithdevil.bank.entities.KycStatus;
-import com.codewithdevil.bank.repositories.AccountRepository;
-import com.codewithdevil.bank.repositories.CustomerRepository;
-import io.jsonwebtoken.impl.security.EdwardsCurve;
+import com.codewithdevil.bank.exceptions.AccountNotFoundException;
+import com.codewithdevil.bank.exceptions.CustomerKYCInvalidException;
+import com.codewithdevil.bank.exceptions.CustomerNotFoundException;
+import com.codewithdevil.bank.services.AccountService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -24,96 +19,46 @@ import java.util.Map;
 @RequestMapping("/accounts")
 public class AccountController {
 
-    private final AccountRepository accountRepository;
-    private JwtController jwtController;
-    private CustomerRepository customerRepository;
-
-    private static Long accountCount = 0L;
+    private final AccountService accountService;
 
     @PostMapping
     public ResponseEntity<?> createAccount(
-            @RequestBody AccountRequest request,
+            @Valid @RequestBody AccountRequest request,
             @RequestHeader("Authorization") String token
     ){
-        var jwt = jwtController.getJwt(token);
-        if(jwt.isExpired()){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    Map.of("Error", "Token is expired")
-            );
-        }
-
-        var customer = customerRepository.findByUserId(Long.parseLong(jwt.getUserId())).orElse(null);
-        if(customer == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    Map.of("Error", "Customer not found")
-            );
-        }
-
-        if(!customer.getKycStatus().equals(KycStatus.ACTIVE)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                    Map.of("Error", "Customer Kyc status is not active")
-            );
-        }
-
-        var account = Account.builder()
-                        .accountNumber(getAccountNumber())
-                        .type(request.getType())
-                        .currency(request.getCurrency())
-                        .balance(BigDecimal.ZERO)
-                        .status(AccountStatus.ACTIVE)
-                        .customer(customer)
-                        .version(1)
-                        .openAt(LocalDateTime.now())
-                        .createdAt(LocalDateTime.now())
-                        .updatedAt(LocalDateTime.now())
-                        .build();
-
-        accountRepository.save(account);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new AccountResponse(
-                        account.getId(),
-                        account.getStatus(),
-                        account.getBalance()
-                )
-        );
-
+        var response = accountService.createAccount(request, token);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateAccountStatus(
             @PathVariable Long id,
             @RequestHeader("Authorization") String token,
-            @RequestBody AccountStatusRequest request
+            @Valid @RequestBody AccountStatusRequest request
     ){
-        var jwt = jwtController.getJwt(token);
-        if(jwt.isExpired()){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    Map.of("Error", "Token is expired")
-            );
-        }
+        var response = accountService.updateAccountStatus(id, token, request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
-        var account = accountRepository.findById(id).orElse(null);
-        if(account == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    Map.of("Error", "Account not found")
-            );
-        }
-
-        account.setStatus(request.getStatus());
-        accountRepository.save(account);
-
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new AccountStatusResponse(
-                        account.getId(),
-                        account.getStatus()
-                )
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCustomerNotFoundException(){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("Error", "Customer not found")
         );
     }
 
-    private String getAccountNumber(){
-        int branchCode = 123456;
-        return Integer.toString(branchCode) + (accountCount++).toString();
+    @ExceptionHandler(CustomerKYCInvalidException.class)
+    public ResponseEntity<Map<String, String>> handleCustomerKYCInvalidException(){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                Map.of("Error", "Customer Kyc status is not active")
+        );
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAccountNotFoundException(){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("Error", "Account not found")
+        );
     }
 
 }
