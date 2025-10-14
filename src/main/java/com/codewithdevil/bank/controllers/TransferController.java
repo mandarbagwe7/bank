@@ -66,7 +66,7 @@ public class TransferController {
             );
         }
 
-        if(sourceAccount.getBalance().subtract(request.getAmount()).intValue() > 0){
+        if(sourceAccount.getBalance().subtract(request.getAmount()).intValue() < 0){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     Map.of("Error", "Source account balance not enough")
             );
